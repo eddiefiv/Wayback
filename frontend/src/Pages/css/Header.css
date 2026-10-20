@@ -1,0 +1,26 @@
+/* Design Header */
+.header {
+    display: flex;
+    background-color :hsla(214, 10%, 86%, 0.82);
+    padding: 15px;
+    justify-content: space-between;
+}
+
+.logo {
+    color: rgb(24, 23, 23);
+    font-size: 26px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav{
+    display: flex;
+    gap: 15px;
+}
+
+.nav-link {
+    color: rgb(24, 23, 23);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: bold;
+}

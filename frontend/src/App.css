@@ -1,0 +1,137 @@
+
+/* WayBack Global Theme */
+
+:root {
+  --primary-blue: #1268c4;
+  --dark-blue: rgb(24, 23, 23);
+  --hover-blue: #094d98;
+  --light-blue: #e8f2ff;
+  --background: #f3f7fc;
+  --white: #ffffff;
+  --text-color: rgb(24, 23, 23);
+  --muted-text: rgb(54, 50, 50);
+  --border-color: #dfe6ef;
+}
+
+/* General Layout */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background);
+  color: var(--text-color);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Headings */
+
+h1, h2, h3 {
+  color: var(--dark-blue);
+}
+
+h1 {
+  font-size: 40px;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+/* Buttons */
+
+button {
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--hover-blue);
+}
+
+button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Forms */
+
+input,
+textarea,
+select {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  color: var(--text-color);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 1px;
+}
+
+label {
+  color: var(--dark-blue);
+  font-weight: 600;
+}
+
+/* Links */
+
+a {
+  transition: color 0.2s ease;
+}
+
+/* Cards */
+
+.item-card,
+.browse-card,
+.step-card {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 105, 0.06);
+}
+
+/* Messages */
+
+.error-message {
+  color: #b91c1c;
+}
+
+.success-message {
+  color: #15803d;
+}
+
+/* Responsive Design */
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 32px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  button {
+    font-size: 14px;
+  }
+}

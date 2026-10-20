@@ -1,0 +1,120 @@
+.browse-page {
+  width: 100%;
+  max-width: none;
+  margin: 30px 0;
+  padding: 35px;
+  box-sizing: border-box;
+  border-radius: 15px;
+  text-align: left;
+}
+
+.browse-page h2 {
+  font-size: 25px;
+  margin: 0 0 12px;
+  text-align: left;
+  font-weight: bold;
+}
+
+
+.browse-page .search-container {
+  width: 100%;
+  max-width: none;
+  margin-bottom: 25px;
+  display: block;
+}
+
+
+.browse-page .search-container input {
+  wdisplay: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  padding: 15px 45px 15px 15px;;
+  border-radius: 10px;
+  color: #334155;
+  font-size: 16px;
+
+}
+
+.browse-page .search-container input:focus {
+  outline: none;
+  border-color: #1268c4;
+  box-shadow: 0 0 0 3px rgba(18, 104, 196, 0.12);
+}
+
+.browse-description {
+  font-size: 15px;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+
+.browse-page .item-card {
+    gap: 12px;
+    padding: 14px;
+    align-items: flex-start;
+  }
+
+.browse-page .item-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.browse-page .item-card:hover {
+  box-shadow: 0 6px 20px rgba(18, 104, 196, 0.12);
+  transform: translateY(-2px);
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.item-info p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.item-description {
+  color: #475569 !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.browse-page .filter-buttons button {
+    padding: 2cap;
+}
+
+.browse-page .status {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.browse-page .status.lost {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.browse-page .status.found {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
