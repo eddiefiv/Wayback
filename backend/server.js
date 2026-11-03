@@ -4,6 +4,7 @@ const cors = require("cors");
 const pool = require("./db");
 const itemRoutes = require("./routes/items");
 const authRoutes = require("./routes/auth");
+const claimRoutes = require("./routes/claims");
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/api/items", itemRoutes);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/claims", claimRoutes);
 
 // Test
 app.get("/api/health", async (req, res) => {

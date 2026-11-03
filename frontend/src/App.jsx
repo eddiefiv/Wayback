@@ -9,6 +9,9 @@ import "./App.css";
 import RetrievalRequest from "./Pages/Request.jsx";
 import Login from "./Pages/Login.jsx";
 import Register from "./Pages/Register.jsx";
+import MyClaims from "./Pages/MyClaims.jsx";
+import StaffDashboard from "./Pages/StaffDashboard.jsx";
+import MySubmissions from "./Pages/MySubmissions.jsx";
 import { getItems } from "./api.js";
 
 function readStoredAuth() {
@@ -97,7 +100,9 @@ function App() {
         <Route
           path="/post"
           element={
-            auth ? (
+            auth?.user.role === "security_staff" ? (
+              <p>Security staff accounts cannot post community listings.</p>
+            ) : auth?.user.role === "community" ? (
               <Post addItem={addItem} token={auth.token} />
             ) : (
               <p>Please <Link to="/login">log in</Link> to post an item.</p>
@@ -107,7 +112,14 @@ function App() {
 
         <Route
           path="/retrieve/:itemId"
-          element={<RetrievalRequest items={items} />}
+          element={
+            <RetrievalRequest
+              items={items}
+              token={auth?.token}
+              user={auth?.user}
+              loading={loadingItems}
+            />
+          }
         />
 
         <Route
@@ -116,6 +128,43 @@ function App() {
         />
 
         <Route path="/register" element={<Register />} />
+
+        <Route
+          path="/claims"
+          element={
+            auth?.user.role === "security_staff" ? (
+              <p>Security staff accounts do not submit community claims.</p>
+            ) : auth?.user.role === "community" ? (
+              <MyClaims token={auth.token} />
+            ) : (
+              <p>Please <Link to="/login">log in</Link> to view your claims.</p>
+            )
+          }
+        />
+
+        <Route
+          path="/submissions"
+          element={
+            auth?.user.role === "community" ? (
+              <MySubmissions token={auth.token} />
+            ) : auth?.user.role === "security_staff" ? (
+              <p>Security staff accounts do not post community listings.</p>
+            ) : (
+              <p>Please <Link to="/login">log in</Link> to view your submissions.</p>
+            )
+          }
+        />
+
+        <Route
+          path="/staff"
+          element={
+            auth?.user.role === "security_staff" ? (
+              <StaffDashboard token={auth.token} />
+            ) : (
+              <p>This dashboard is available to security staff only.</p>
+            )
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

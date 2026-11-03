@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const pool = require("../db");
 
 function requireAuth(req, res, next) {
     const authorization = req.get("authorization");
@@ -50,4 +51,38 @@ function requireAuth(req, res, next) {
     }
 }
 
+function requireRole(...allowedRoles) {
+    return async (req, res, next) => {
+        try {
+            const result = await pool.query(
+                "SELECT role FROM users WHERE id = $1",
+                [req.user.id]
+            );
+            const user = result.rows[0];
+
+            if (!user) {
+                return res.status(401).json({
+                    error: "The authenticated account no longer exists."
+                });
+            }
+
+            req.user.role = user.role;
+
+            if (!allowedRoles.includes(user.role)) {
+                return res.status(403).json({
+                    error: "You do not have permission to perform this action."
+                });
+            }
+
+            next();
+        } catch (error) {
+            console.error("Role authorization error:", error.message);
+            res.status(500).json({
+                error: "Could not verify account permissions."
+            });
+        }
+    };
+}
+
 module.exports = requireAuth;
+module.exports.requireRole = requireRole;

@@ -1,0 +1,130 @@
+.staff-dashboard {
+  width: min(100% - 30px, 1100px);
+  margin: 30px auto;
+}
+
+.staff-dashboard section {
+  margin-top: 32px;
+}
+
+.staff-summary,
+.staff-card-heading,
+.staff-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.staff-summary {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin: 16px 0 24px;
+}
+
+.staff-summary span,
+.staff-card-heading > span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--light-blue);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.staff-card-list {
+  display: grid;
+  gap: 16px;
+}
+
+.staff-card {
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 105, 0.06);
+  overflow-wrap: anywhere;
+}
+
+.staff-card-heading h4 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.staff-card p {
+  line-height: 1.5;
+}
+
+.staff-card .claim-status {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.staff-card .claim-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.staff-card .claim-status.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.staff-card .claim-status.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.claim-review-controls,
+.item-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.claim-review-controls textarea,
+.item-edit-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.item-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.item-edit-grid label,
+.item-edit-form > label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staff-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.staff-actions .deny-button {
+  background: #b91c1c;
+}
+
+.staff-warning {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.removed-item {
+  opacity: 0.8;
+}
+
+@media (max-width: 650px) {
+  .item-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

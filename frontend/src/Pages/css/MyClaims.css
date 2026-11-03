@@ -1,0 +1,116 @@
+.my-claims-page {
+  width: min(100% - 30px, 900px);
+  margin: 30px auto;
+}
+
+.my-claims-list {
+  display: grid;
+  gap: 16px;
+}
+
+.my-claim-card {
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 105, 0.06);
+  overflow-wrap: anywhere;
+}
+
+.my-claim-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.my-claim-heading h3 {
+  margin: 0;
+}
+
+.my-claim-card p {
+  line-height: 1.5;
+}
+
+.claim-item-details {
+  color: var(--muted-text);
+}
+
+.claim-status {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.claim-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.claim-status.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.claim-status.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.claim-status.submission-open {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.claim-status.submission-claimed,
+.claim-status.submission-returned {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.claim-status.submission-closed {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.submission-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.submission-type {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.submission-type.found {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.submission-removed-notice {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.my-claim-card li {
+  margin: 8px 0;
+}
+
+@media (max-width: 600px) {
+  .my-claim-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

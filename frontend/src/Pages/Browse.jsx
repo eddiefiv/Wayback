@@ -39,14 +39,14 @@ function Browse({ items = [] }) {
         filteredItems.map((item) => (
           <Link
             to={
-              item.type === "Found"
+              item.type === "Found" && item.status === "open"
                 ? `/retrieve/${item.item_id ?? item.id}`
                 : "#"
             }
             className="item-card item-link"
             key={item.item_id ?? item.id}
             onClick={(e) => {
-              if (item.type !== "Found") {
+              if (item.type !== "Found" || item.status !== "open") {
                 e.preventDefault();
               }
             }}
@@ -69,7 +69,9 @@ function Browse({ items = [] }) {
               <p>{item.description}</p>
             </div>
 
-            <span className="item-arrow">›</span>
+            <span className="item-arrow">
+              {item.type === "Found" && item.status === "open" ? "Claim item ›" : "›"}
+            </span>
           </Link>
         ))
       )}
