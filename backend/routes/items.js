@@ -1,6 +1,7 @@
 
 const express = require("express");
 const pool = require("../db");
+const requireAuth = require("../middleware/requireAuth");
 
 const router = express.Router();
 
@@ -68,8 +69,9 @@ router.get("/:id", async (req, res) => {
 });
 
 
-router.post("/", async (req, res) => {
-    const { title, description, type, date, location } = req.body;
+router.post("/", requireAuth, async (req, res) => {
+    console.log("POST");
+    const { title, description, type, date, location } = req.body || {};
 
     if (
         typeof title !== "string" ||
@@ -90,18 +92,6 @@ router.post("/", async (req, res) => {
     }
 
     try {
-        // Temporary development account until frontend login is connected.
-        const userResult = await pool.query(
-            "SELECT id FROM users WHERE email = $1",
-            ["test@university.edu"]
-        );
-
-        if (userResult.rows.length === 0) {
-            return res.status(400).json({
-                error: "Development user not found. Create the test account first."
-            });
-        }
-
         const result = await pool.query(
             `INSERT INTO items (
                 posted_by,
@@ -114,7 +104,7 @@ router.post("/", async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`,
             [
-                userResult.rows[0].id,
+                req.user.id,
                 type.toLowerCase(),
                 title.trim(),
                 description.trim(),

@@ -1,21 +1,29 @@
-import {Link} from 'react-router-dom';
-import React from 'react';
-import './css/Header.css';
+import { Link } from "react-router-dom";
+import "./css/Header.css";
 
-function Header() {
-
+function Header({ user, onLogout }) {
   return (
-        <header className="header">
-             <div className="logo">
-                 WayBack
-            </div>
-            <nav className="nav">
-                <a className="nav-link" href="/">Home</a>
-                <a className="nav-link" href="/browse">Browse</a>
-                <a className="nav-link" href="/post">Post</a>
-                <a className="nav-link" href="/login">Login</a>
-            </nav>
-        </header>
+    <header className="header">
+      <Link className="logo" to="/">WayBack</Link>
+      <nav className="nav">
+        <Link className="nav-link" to="/">Home</Link>
+        <Link className="nav-link" to="/browse">Browse</Link>
+        <Link className="nav-link" to="/post">Post</Link>
+        {user ? (
+          <>
+            <span className="nav-link">Hi, {user.name}</span>
+            <button className="nav-link" type="button" onClick={onLogout}>
+              Log out
+            </button>
+          </>
+        ) : (
+          <>
+            <Link className="nav-link" to="/login">Login</Link>
+            <Link className="nav-link" to="/register">Register</Link>
+          </>
+        )}
+      </nav>
+    </header>
   );
 }
 

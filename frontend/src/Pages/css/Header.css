@@ -24,3 +24,10 @@
     font-size: 15px;
     font-weight: bold;
 }
+
+button.nav-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}

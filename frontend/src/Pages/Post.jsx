@@ -1,9 +1,10 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { saveItem } from "../api.js";
 import "./css/Post.css";
 
-function Post({ addItem }) {
+function Post({ addItem, token }) {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -43,19 +44,7 @@ function Post({ addItem }) {
     setSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/items", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(form)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to post item.");
-      }
+      const data = await saveItem(form, token);
 
       addItem(data);
       setSuccess("Item posted successfully!");

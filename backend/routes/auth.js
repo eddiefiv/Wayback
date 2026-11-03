@@ -8,7 +8,7 @@ const router = express.Router();
 
 // community account
 router.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
     if (
         typeof name !== "string" ||
@@ -62,7 +62,7 @@ router.post("/register", async (req, res) => {
 
 // Log in
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (
         typeof email !== "string" ||

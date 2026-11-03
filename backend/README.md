@@ -1,4 +1,4 @@
-Uses 
+Uses
 
 Node.js
 Express.js
@@ -17,7 +17,7 @@ Run the SQL statements from schema.sql to create the required tables.
 
 2. Environment Variables
 
-Make .env file in backend and paste this into it 
+Make .env file in backend and paste this into it
 
 DB_HOST=localhost
 DB_PORT=5432
