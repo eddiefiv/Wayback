@@ -5,6 +5,7 @@ const pool = require("./db");
 const itemRoutes = require("./routes/items");
 const authRoutes = require("./routes/auth");
 const claimRoutes = require("./routes/claims");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = 3000;
@@ -20,6 +21,7 @@ app.use("/api/items", itemRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/claims", claimRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Test
 app.get("/api/health", async (req, res) => {

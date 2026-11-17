@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import "./css/Home.css";
 
-function Home() {
+function Home({ user }) {
   return (
     <main className="home">
       <h1>WayBack</h1>
@@ -14,9 +14,11 @@ function Home() {
         <Link to="/browse" className="home-btn">
           Browse Items
         </Link>
-        <Link to="/post" className="home-btn">
-          Post an Item
-        </Link>
+        {(!user || (user.role === "community" && user.can_post)) && (
+          <Link to="/post" className="home-btn">
+            Post an Item
+          </Link>
+        )}
       </div>
     </main>
   );

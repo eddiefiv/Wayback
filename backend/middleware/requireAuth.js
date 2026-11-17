@@ -55,7 +55,7 @@ function requireRole(...allowedRoles) {
     return async (req, res, next) => {
         try {
             const result = await pool.query(
-                "SELECT role FROM users WHERE id = $1",
+                "SELECT role, can_post, can_claim FROM users WHERE id = $1",
                 [req.user.id]
             );
             const user = result.rows[0];
@@ -67,6 +67,8 @@ function requireRole(...allowedRoles) {
             }
 
             req.user.role = user.role;
+            req.user.can_post = user.can_post;
+            req.user.can_claim = user.can_claim;
 
             if (!allowedRoles.includes(user.role)) {
                 return res.status(403).json({
@@ -84,5 +86,18 @@ function requireRole(...allowedRoles) {
     };
 }
 
+function requirePermission(permission) {
+    return (req, res, next) => {
+        if (req.user[permission] !== true) {
+            return res.status(403).json({
+                error: `Your account does not have permission to ${permission === "can_post" ? "post or edit listings" : "submit claims"}.`
+            });
+        }
+
+        next();
+    };
+}
+
 module.exports = requireAuth;
 module.exports.requireRole = requireRole;
+module.exports.requirePermission = requirePermission;

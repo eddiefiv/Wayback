@@ -2,6 +2,7 @@ const express = require("express");
 const pool = require("../db");
 const requireAuth = require("../middleware/requireAuth");
 const requireRole = requireAuth.requireRole;
+const requirePermission = requireAuth.requirePermission;
 
 const router = express.Router();
 
@@ -217,7 +218,7 @@ router.patch("/:claimId/review", requireAuth, requireRole("security_staff"), asy
     }
 });
 
-router.post("/:itemId", requireAuth, requireRole("community"), async (req, res) => {
+router.post("/:itemId", requireAuth, requireRole("community"), requirePermission("can_claim"), async (req, res) => {
     const itemId = Number(req.params.itemId);
     const { explanation, evidence } = req.body || {};
 

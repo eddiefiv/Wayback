@@ -1,36 +1,18 @@
-# WayBack Schema Changes: Security Staff
+# WayBack database migration
 
-Apply this migration once to the database after creating the current tables with `backend/schema.sql`. It preserves existing claim and evidence records when a listing is removed: removal is a soft delete, not a cascading delete.
+For a new database, create the tables from [`backend/schema.sql`](./backend/schema.sql). For a database that already contains the earlier WayBack schema, apply [`backend/migrations/002_system_administrator_permissions.sql`](./backend/migrations/002_system_administrator_permissions.sql) once.
+
+The migration adds the `system_administrator` role and per-account `can_post` / `can_claim` permissions. Existing `admin` accounts remain security staff, matching the prior role migration. It also brings the soft-delete columns and supporting indexes used by the current item and claim routes into existing databases.
+
+Public registration always creates a community account and never accepts a requested role or permission. To provision a system administrator, first register the account normally, then promote that account using its actual email:
 
 ```sql
-BEGIN;
-
-ALTER TABLE users
-    DROP CONSTRAINT IF EXISTS users_role_check;
-
 UPDATE users
-SET role = 'security_staff'
-WHERE role = 'admin';
-
-ALTER TABLE users
-    ADD CONSTRAINT users_role_check
-    CHECK (role IN ('community', 'security_staff'));
-
-ALTER TABLE items
-    ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS deleted_by INTEGER
-        REFERENCES users(id) ON DELETE SET NULL;
-
-CREATE INDEX IF NOT EXISTS idx_claims_status_created_at
-    ON claims (status, created_at DESC);
-
-CREATE INDEX IF NOT EXISTS idx_items_deleted_created_at
-    ON items (deleted_at, created_at DESC);
-
-COMMIT;
+SET role = 'system_administrator'
+WHERE email = 'admin@example.edu';
 ```
 
-The existing `admin` role is migrated to `security_staff`. The database continues to default new accounts to `community`; public registration must not accept a role from the request. To provision a staff account, first register it normally, then run this statement using that account's actual email:
+Security staff accounts can likewise be provisioned without exposing staff privileges through public registration:
 
 ```sql
 UPDATE users
@@ -38,6 +20,6 @@ SET role = 'security_staff'
 WHERE email = 'staff@example.edu';
 ```
 
-The migration intentionally does not create staff credentials or promote a particular account. Affected users should sign out and back in after promotion so the login response contains the new role. Backend role checks also read the current database role for protected operations.
+At least one system administrator must remain; the administration API rejects demotion of the last one and prevents an administrator from removing their own system administrator role. User IDs, roles, and posting/claiming permissions are checked against PostgreSQL for each protected operation. Users should sign out and back in after deployment so the frontend receives the new permission fields in the login response.
 
-`items.deleted_at` and `items.deleted_by` record staff removals while preserving item, claim, and evidence history. Removed items disappear from public item queries and cannot have claims approved, but remain visible on the staff dashboard.
+`items.deleted_at` and `items.deleted_by` record staff removals without deleting listing, claim, or evidence history. Removed items stay visible to staff and their owners, but not in public browse results or generated reports.
