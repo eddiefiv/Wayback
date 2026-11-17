@@ -10,9 +10,11 @@
 - Signed-in users can view their submitted claims, current status, review notes, and evidence links from the My Claims page.
 - Community users can view all items they have posted, including current status and listings removed from public browse, from the My Submissions page.
 - Security staff use a separate `security_staff` role and dashboard to review/approve/deny claims and edit or remove any listing. Public account registration always creates a community account.
+- System administrators use the System Administration Console to change account roles and posting/claiming permissions, and to generate summary reports for export as CSV.
+- Community members can edit their own active listings from My Activity. Server-side ownership checks prevent edits to another member's listing.
 - The frontend API URL defaults to `http://localhost:3000/api`; set `VITE_API_URL` in the frontend environment to use another API base URL.
 
-Security staff require the database migration and manual account provisioning described in [SCHEMA_CHANGES.md](./SCHEMA_CHANGES.md). Item removal is a soft delete to preserve claim and evidence history.
+Existing databases require the migration and manual account provisioning described in [SCHEMA_CHANGES.md](./SCHEMA_CHANGES.md). Item removal is a soft delete to preserve claim and evidence history.
 
 ## API
 
@@ -32,7 +34,7 @@ Request:
 }
 ```
 
-Returns `201 Created` with a success message and the new user's `id`, `name`, `email`, `role`, and `created_at`. Names and emails must be non-empty, the email must be valid, and passwords must contain 8-128 characters. Returns `400` for invalid input and `409` if the email is already registered.
+Returns `201 Created` with a success message and the new user's `id`, `name`, `email`, `role`, `can_post`, `can_claim`, and `created_at`. Names and emails must be non-empty, the email must be valid, and passwords must contain 8-128 characters. Returns `400` for invalid input and `409` if the email is already registered.
 
 ### `POST /api/auth/login`
 
@@ -47,7 +49,7 @@ Request:
 }
 ```
 
-Returns `200 OK` with `token` and the authenticated user's `id`, `name`, `email`, and `role`. The signed JWT expires after two hours. Returns `400` if the email or password is missing or not a string, and `401` if the email/password pair is incorrect.
+Returns `200 OK` with `token` and the authenticated user's `id`, `name`, `email`, `role`, `can_post`, and `can_claim`. The signed JWT expires after two hours. Returns `400` if the email or password is missing or not a string, and `401` if the email/password pair is incorrect.
 
 ### `GET /api/items`
 
@@ -82,7 +84,7 @@ Request:
 }
 ```
 
-`type` must be `Lost` or `Found`; the other fields are required. Returns `201 Created` with the stored listing. Returns `400` for invalid item details, `401` if the bearer token is missing, invalid, or expired, and `500` if storage or authentication configuration fails.
+`type` must be `Lost` or `Found`; the other fields are required. Returns `201 Created` with the stored listing. Returns `400` for invalid item details, `401` if the bearer token is missing, invalid, or expired, and `403` if posting is disabled for the account.
 
 Only community users may create listings.
 
@@ -92,11 +94,23 @@ Returns all listings, including removed listings and poster details. Requires a 
 
 ### `PATCH /api/items/:id`
 
-Edits one active listing. Requires a `security_staff` bearer token. Supply one or more of `title`, `description`, `item_type`, `category`, `color`, `brand`, `location_text`, `event_date`, or `status`. Nullable descriptive fields and `event_date` may be set to `null`; status must be `open`, `claimed`, `returned`, or `closed`. Returns the updated item, `400` for invalid fields, `401` without valid authentication, `403` for non-staff accounts, and `404` if no active item exists.
+Edits one active listing. Requires a community or `security_staff` bearer token. Community users may update only their own listing's `title`, `description`, `item_type`, `category`, `color`, `brand`, `location_text`, and `event_date`; they cannot change its status. Security staff may also edit status (`open`, `claimed`, `returned`, or `closed`) and can update any active listing. Nullable descriptive fields and `event_date` may be set to `null`. Returns the updated item, `400` for invalid fields, `401` without valid authentication, `403` if the role is not permitted or community editing is disabled, and `404` if the listing is not active or is not owned by the community user.
 
 ### `DELETE /api/items/:id`
 
 Removes an active listing from public browse and claim approval without deleting its record or claim/evidence history. Stores removal time and staff account ID. Requires a `security_staff` bearer token. Returns `404` if no active listing exists, `401` without valid authentication, and `403` for non-staff accounts.
+
+### `GET /api/admin/users` and `GET /api/admin/users/:userId`
+
+List users or retrieve one user, including their role and `can_post` / `can_claim` permissions. Requires a `system_administrator` bearer token. The detail endpoint returns `404` for an invalid or unknown user ID.
+
+### `PATCH /api/admin/users/:userId`
+
+Update one or more of `role`, `can_post`, and `can_claim`. The allowed roles are `community`, `security_staff`, and `system_administrator`; permissions must be booleans. Requires a `system_administrator` bearer token. Returns `404` if the user does not exist, `400` for invalid changes, and `409` if the change would remove the last system administrator or the actor's own administrator role.
+
+### `GET /api/admin/reports?type=lost|found|all`
+
+Generate a summary of active listings by item type, status, and location. Requires a `system_administrator` bearer token. `type` is required; an omitted or unsupported type returns `400`. Returns the chosen type, generation time, and report rows, which the System Administration Console displays and exports as CSV.
 
 ### `GET /api/health`
 
@@ -124,7 +138,7 @@ Request:
 }
 ```
 
-`explanation` is required and limited to 2,000 characters. Provide 1-10 evidence entries; each needs an HTTPS `file_path` (up to 2,048 characters), and may include a `description` of up to 500 characters. Links can point to multimedia or document files; the service stores the link and optional description without uploading or inspecting the file. Only community users can submit claims. Returns `201 Created` with the claim and evidence link details. Returns `400` for invalid input, `401` for missing/invalid/expired authentication, `403` if the claimant posted the item or is not a community user, `404` if the item does not exist, and `409` if the item is not an active open found listing or the user already has a pending claim for it. Claims and evidence are inserted in one database transaction.
+`explanation` is required and limited to 2,000 characters. Provide 1-10 evidence entries; each needs an HTTPS `file_path` (up to 2,048 characters), and may include a `description` of up to 500 characters. Links can point to multimedia or document files; the service stores the link and optional description without uploading or inspecting the file. Only community users with `can_claim` enabled can submit claims. Returns `201 Created` with the claim and evidence link details. Returns `400` for invalid input, `401` for missing/invalid/expired authentication, `403` if the claimant posted the item, is not a community user, or claiming is disabled, `404` if the item does not exist, and `409` if the item is not an active open found listing or the user already has a pending claim for it. Claims and evidence are inserted in one database transaction.
 
 ### `GET /api/claims/mine`
 
@@ -150,10 +164,10 @@ Approves or denies a pending claim. Requires a `security_staff` bearer token.
 ## Local setup
 
 1. Configure the backend `.env` values documented in [backend/README.md](./backend/README.md), including `JWT_SECRET`.
-2. Create the PostgreSQL tables using `backend/schema.sql`.
+2. Create the PostgreSQL tables using `backend/schema.sql`, or apply the migration in `backend/migrations/002_system_administrator_permissions.sql` to an existing database.
 3. Start the API from `backend` with `npm run dev`.
 4. Start the frontend from `frontend` with `npm run dev`.
 5. Register at the frontend's `/register` page (or call `POST /api/auth/register`), then log in at `/login`.
-6. To enable security staff, apply `SCHEMA_CHANGES.md`, register the staff account as usual, promote it with the SQL statement in that file, then sign in again. Staff accounts see the Staff Dashboard link.
+6. To enable security staff or system administrators, register the account normally, promote it with the SQL statement in [SCHEMA_CHANGES.md](./SCHEMA_CHANGES.md), then sign in again. Staff accounts see the Staff Dashboard; system administrators see the System Administration Console.
 
 For a deployed frontend, configure the backend CORS origin in `backend/server.js` to match that frontend's origin.

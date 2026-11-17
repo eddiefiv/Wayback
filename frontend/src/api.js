@@ -101,6 +101,41 @@ export function removeItem(itemId, token) {
   });
 }
 
+export function getAdminUsers(token) {
+  return request("/admin/users", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+export function getAdminUser(userId, token) {
+  return request(`/admin/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+export function updateAdminUser(userId, user, token) {
+  return request(`/admin/users/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(user)
+  });
+}
+
+export function getAdminReport(type, token) {
+  return request(`/admin/reports?type=${encodeURIComponent(type)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
 export function getClaimsForReview(token) {
   return request("/claims/review", {
     headers: {

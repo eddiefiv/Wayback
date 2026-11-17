@@ -6,8 +6,10 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'community'
-        CHECK (role IN ('community', 'admin')),
+    role VARCHAR(32) NOT NULL DEFAULT 'community'
+        CHECK (role IN ('community', 'security_staff', 'system_administrator')),
+    can_post BOOLEAN NOT NULL DEFAULT TRUE,
+    can_claim BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -25,6 +27,8 @@ CREATE TABLE items (
     event_date DATE,
     status VARCHAR(20) NOT NULL DEFAULT 'open'
         CHECK (status IN ('open', 'claimed', 'returned', 'closed')),
+    deleted_at TIMESTAMPTZ,
+    deleted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -55,3 +59,9 @@ CREATE TABLE claim_evidence (
     description TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_claims_status_created_at
+    ON claims (status, created_at DESC);
+
+CREATE INDEX idx_items_deleted_created_at
+    ON items (deleted_at, created_at DESC);

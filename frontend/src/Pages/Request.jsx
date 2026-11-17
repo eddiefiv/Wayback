@@ -120,7 +120,12 @@ function RetrievalRequest({ items, token, user, loading }) {
         ) : user.role !== "community" ? (
           <>
             <h2>Community account required</h2>
-            <p>Security staff accounts cannot submit ownership claims.</p>
+            <p>Only community accounts can submit ownership claims.</p>
+          </>
+        ) : !user.can_claim ? (
+          <>
+            <h2>Claiming is disabled</h2>
+            <p>Your account does not currently have permission to submit claims.</p>
           </>
         ) : (
           <>

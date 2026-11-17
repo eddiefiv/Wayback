@@ -38,7 +38,7 @@ router.post("/register", async (req, res) => {
         const result = await pool.query(
             `INSERT INTO users (name, email, password_hash)
              VALUES ($1, $2, $3)
-             RETURNING id, name, email, role, created_at`,
+             RETURNING id, name, email, role, can_post, can_claim, created_at`,
             [name.trim(), normalizedEmail, passwordHash]
         );
 
@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
 
     try {
         const result = await pool.query(
-            `SELECT id, name, email, password_hash, role
+            `SELECT id, name, email, password_hash, role, can_post, can_claim
              FROM users
              WHERE email = $1`,
             [email.trim().toLowerCase()]
@@ -114,7 +114,9 @@ router.post("/login", async (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                can_post: user.can_post,
+                can_claim: user.can_claim
             }
         });
     } catch (error) {

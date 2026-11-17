@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import Header from "./Pages/Header.jsx";
 import Home from "./Pages/Home.jsx";
 import Browse from "./Pages/Browse.jsx";
@@ -12,6 +12,7 @@ import Register from "./Pages/Register.jsx";
 import MyClaims from "./Pages/MyClaims.jsx";
 import StaffDashboard from "./Pages/StaffDashboard.jsx";
 import MySubmissions from "./Pages/MySubmissions.jsx";
+import SystemAdmin from "./Pages/SystemAdmin.jsx";
 import { getItems } from "./api.js";
 
 function readStoredAuth() {
@@ -21,6 +22,17 @@ function readStoredAuth() {
   } catch {
     return null;
   }
+}
+
+function StatusPage({ code, title, description }) {
+  return (
+    <main className="status-page">
+      <p className="status-code">{code}</p>
+      <h1>{title}</h1>
+      <p>{description}</p>
+      <Link to="/">Return home</Link>
+    </main>
+  );
 }
 
 function App() {
@@ -82,7 +94,7 @@ function App() {
       <Header user={auth?.user} onLogout={handleLogout} />
 
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home user={auth?.user} />} />
 
         <Route
           path="/browse"
@@ -100,10 +112,14 @@ function App() {
         <Route
           path="/post"
           element={
-            auth?.user.role === "security_staff" ? (
-              <p>Security staff accounts cannot post community listings.</p>
+            auth?.user.role === "security_staff" || auth?.user.role === "system_administrator" ? (
+              <Navigate to="/unauthorized" replace />
             ) : auth?.user.role === "community" ? (
-              <Post addItem={addItem} token={auth.token} />
+              auth.user.can_post ? (
+                <Post addItem={addItem} token={auth.token} />
+              ) : (
+                <StatusPage code="403" title="Posting disabled" description="Your account does not have permission to post listings." />
+              )
             ) : (
               <p>Please <Link to="/login">log in</Link> to post an item.</p>
             )
@@ -132,10 +148,14 @@ function App() {
         <Route
           path="/claims"
           element={
-            auth?.user.role === "security_staff" ? (
-              <p>Security staff accounts do not submit community claims.</p>
+            auth?.user.role === "security_staff" || auth?.user.role === "system_administrator" ? (
+              <Navigate to="/unauthorized" replace />
             ) : auth?.user.role === "community" ? (
-              <MyClaims token={auth.token} />
+              auth.user.can_claim ? (
+                <MyClaims token={auth.token} />
+              ) : (
+                <StatusPage code="403" title="Claiming disabled" description="Your account does not have permission to submit claims." />
+              )
             ) : (
               <p>Please <Link to="/login">log in</Link> to view your claims.</p>
             )
@@ -146,9 +166,22 @@ function App() {
           path="/submissions"
           element={
             auth?.user.role === "community" ? (
-              <MySubmissions token={auth.token} />
-            ) : auth?.user.role === "security_staff" ? (
-              <p>Security staff accounts do not post community listings.</p>
+              <MySubmissions token={auth.token} canEdit={auth.user.can_post} />
+            ) : auth?.user ? (
+              <Navigate to="/unauthorized" replace />
+            ) : (
+              <p>Please <Link to="/login">log in</Link> to view your submissions.</p>
+            )
+          }
+        />
+
+        <Route
+          path="/submissions/:itemId"
+          element={
+            auth?.user.role === "community" ? (
+              <MySubmissions token={auth.token} canEdit={auth.user.can_post} />
+            ) : auth?.user ? (
+              <Navigate to="/unauthorized" replace />
             ) : (
               <p>Please <Link to="/login">log in</Link> to view your submissions.</p>
             )
@@ -164,6 +197,49 @@ function App() {
               <p>This dashboard is available to security staff only.</p>
             )
           }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            auth?.user.role === "system_administrator" ? (
+              <SystemAdmin token={auth.token} />
+            ) : (
+              <Navigate to="/unauthorized" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            auth?.user.role === "system_administrator" ? (
+              <SystemAdmin token={auth.token} section="reports" />
+            ) : (
+              <Navigate to="/unauthorized" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/users/:userId"
+          element={
+            auth?.user.role === "system_administrator" ? (
+              <SystemAdmin token={auth.token} />
+            ) : (
+              <Navigate to="/unauthorized" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/unauthorized"
+          element={<StatusPage code="401" title="Unauthorized" description="You do not have permission to view this page." />}
+        />
+
+        <Route
+          path="*"
+          element={<StatusPage code="404" title="Page not found" description="The page you are looking for could not be found." />}
         />
       </Routes>
     </BrowserRouter>

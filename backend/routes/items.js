@@ -3,6 +3,7 @@ const express = require("express");
 const pool = require("../db");
 const requireAuth = require("../middleware/requireAuth");
 const requireRole = requireAuth.requireRole;
+const requirePermission = requireAuth.requirePermission;
 
 const router = express.Router();
 
@@ -124,7 +125,7 @@ router.get("/:id", async (req, res) => {
 });
 
 
-router.post("/", requireAuth, requireRole("community"), async (req, res) => {
+router.post("/", requireAuth, requireRole("community"), requirePermission("can_post"), async (req, res) => {
     const { title, description, type, date, location } = req.body || {};
 
     if (
@@ -176,9 +177,17 @@ router.post("/", requireAuth, requireRole("community"), async (req, res) => {
     }
 });
 
-router.patch("/:id", requireAuth, requireRole("security_staff"), async (req, res) => {
+router.patch("/:id", requireAuth, requireRole("community", "security_staff"), async (req, res) => {
     const id = Number(req.params.id);
     const body = req.body || {};
+    const isCommunity = req.user.role === "community";
+
+    if (isCommunity && !req.user.can_post) {
+        return res.status(403).json({
+            error: "Your account does not have permission to edit listings."
+        });
+    }
+
     const fieldMap = {
         title: "title",
         description: "description",
@@ -187,9 +196,10 @@ router.patch("/:id", requireAuth, requireRole("security_staff"), async (req, res
         color: "color",
         brand: "brand",
         location_text: "location_text",
-        event_date: "event_date",
-        status: "status"
+        event_date: "event_date"
     };
+    if (!isCommunity) fieldMap.status = "status";
+
     const updates = Object.keys(fieldMap).filter((field) =>
         Object.prototype.hasOwnProperty.call(body, field)
     );
@@ -249,12 +259,17 @@ router.patch("/:id", requireAuth, requireRole("security_staff"), async (req, res
     const assignments = updates.map((field, index) =>
         `${fieldMap[field]} = $${index + 1}`
     );
+    let whereClause = `id = $${values.length} AND deleted_at IS NULL`;
+    if (isCommunity) {
+        values.push(req.user.id);
+        whereClause += ` AND posted_by = $${values.length}`;
+    }
 
     try {
         const result = await pool.query(
             `UPDATE items
              SET ${assignments.join(", ")}
-             WHERE id = $${values.length} AND deleted_at IS NULL
+             WHERE ${whereClause}
              RETURNING *`,
             values
         );
